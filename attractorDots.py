@@ -4,10 +4,33 @@ import tkinter
 import random
 import array
 import math
-import importlib #separate file to do the functions for the game of life??
+from graphics import *
+#import importlib #separate file to do the functions for the game of life??
 #import argparse
 
-#default values and ability to change window size from arguments
+#default values and ability to change window size from arguments?
+
+def updateBoard(board):
+    newBoard = board
+
+    change = True
+    dim = len(board)
+    neighbors = 0   
+    for i in range(dim):
+        for j in range(len(dim)):
+                neighbors = (board[(i - 1) % dim][(j - 1) % dim] + board[i][(j - 1) % dim] + board[(i + 1) % dim][(j - 1) % dim] +
+                            board[(i - 1) % dim][j] + board[(i + 1) % dim][j] +
+                            board[(i - 1) % dim][(j + 1) % dim] + board[i][(j + 1) % dim] + board[(i + 1) % dim][(j + 1) % dim])
+                if board[i][j] == 1:
+                    if (neighbors < 2) | (neighbors > 3):
+                        newBoard[i][j] = 0
+                else: # dead cell
+                    if neighbors == 3:
+                        newBoard[i][j] = 1
+    if board == newBoard:
+        change = False
+    
+    return newBoard, change
 
 def distance(x2, x1, y2, y1):
     return math.sqrt(math.pow((x2 - x1), 2) + math.pow((y2 - y1), 2))
@@ -31,7 +54,7 @@ def generateAnchorPts(numPts):
     angle = (2 * math.pi) / numPts
     ret[0][0] = firstAnchorPt[0]
     ret[0][1] = firstAnchorPt[1]
-    C.create_oval(firstAnchorPt[0] - 5, firstAnchorPt[1] - 5, firstAnchorPt[0] + 5, firstAnchorPt[1] + 5, fill='red')
+    #C.create_oval(firstAnchorPt[0] - 5, firstAnchorPt[1] - 5, firstAnchorPt[0] + 5, firstAnchorPt[1] + 5, fill='red')
     cumAngle = angle
     i = 1
     while i < numPts:
@@ -39,7 +62,7 @@ def generateAnchorPts(numPts):
         nextY = -1 * (r * math.cos(cumAngle)) #needs to be flipped due to y axis pointing down in tkinter
         nextX = -1 * (r * math.sin(cumAngle)) #(x, y) becomes (-y, x) to rotate ccw as x axis now rotated pi ccw
         #print(nextX + 250, nextY + 250)
-        C.create_oval(nextX + windowMidpoint[0] - 5, nextY + windowMidpoint[1] - 5, nextX + windowMidpoint[0] + 5, nextY + windowMidpoint[1] + 5, fill='red')
+        #C.create_oval(nextX + windowMidpoint[0] - 5, nextY + windowMidpoint[1] - 5, nextX + windowMidpoint[0] + 5, nextY + windowMidpoint[1] + 5, fill='red')
         ret[i][0] = nextX + windowMidpoint[0]
         ret[i][1] = nextY + windowMidpoint[1]
         cumAngle += angle
@@ -52,10 +75,12 @@ def getNextPt(lastPt, arr):
     nextAnchor = arr[num][0], arr[num][1]
     return fractionalMidpoint(nextAnchor, lastPt, n)
 
-top = tkinter.Tk()
+#top = tkinter.Tk()
 
-C = tkinter.Canvas(top, bg='black', height=windowDimensions[1], width=windowDimensions[0])
-C.pack()
+#C = tkinter.Canvas(top, bg='black', height=windowDimensions[1], width=windowDimensions[0])
+win = GraphWin('attractor', windowDimensions[1], windowDimensions[0])
+win.setBackground("black")
+#C.pack()
 
 anchors = generateAnchorPts(anchorCount)
 
@@ -64,8 +89,11 @@ i = 0
 while i < shots:
     lastPt = pt
     pt = getNextPt(lastPt, anchors)
-    C.create_oval(pt[0], pt[1], pt[0]+2, pt[1]+2, fill='white')
-    C.update()
+
+    #C.create_oval(pt[0], pt[1], pt[0]+2, pt[1]+2, fill='white')
+    #C.update()
     i += 1
 
-top.mainloop()
+#top.mainloop()
+win.getMouse()
+win.close()
