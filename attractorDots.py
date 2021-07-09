@@ -17,7 +17,7 @@ def updateBoard(board):
     dim = len(board)
     neighbors = 0   
     for i in range(dim):
-        for j in range(len(dim)):
+        for j in range(dim):
                 neighbors = (board[(i - 1) % dim][(j - 1) % dim] + board[i][(j - 1) % dim] + board[(i + 1) % dim][(j - 1) % dim] +
                             board[(i - 1) % dim][j] + board[(i + 1) % dim][j] +
                             board[(i - 1) % dim][(j + 1) % dim] + board[i][(j + 1) % dim] + board[(i + 1) % dim][(j + 1) % dim])
@@ -27,19 +27,19 @@ def updateBoard(board):
                 else: # dead cell
                     if neighbors == 3:
                         newBoard[i][j] = 1
-    if board == newBoard:
-        change = False
+    # if board == newBoard:
+    #     change = False
     
     return newBoard, change
 
 def distance(x2, x1, y2, y1):
     return math.sqrt(math.pow((x2 - x1), 2) + math.pow((y2 - y1), 2))
 
-shots = 100000 #number of dots to be added between poitns
+shots = 500 #number of dots to be added between poitns
 anchorCount = 3 #change number of points(eg for a pentagon change to 5)
-windowDimensions = 1000, 1000
+windowDimensions = 100, 100
 windowMidpoint = windowDimensions[0] / 2, windowDimensions[1] / 2
-firstAnchorPt = windowMidpoint[0], 100
+firstAnchorPt = windowMidpoint[0], 0
 r = distance(firstAnchorPt[0], windowMidpoint[0], firstAnchorPt[1], windowMidpoint[1])
 
 def fractionalMidpoint(pt1, pt2, denominator):
@@ -62,6 +62,7 @@ def generateAnchorPts(numPts):
         nextY = -1 * (r * math.cos(cumAngle)) #needs to be flipped due to y axis pointing down in tkinter
         nextX = -1 * (r * math.sin(cumAngle)) #(x, y) becomes (-y, x) to rotate ccw as x axis now rotated pi ccw
         #print(nextX + 250, nextY + 250)
+        
         #C.create_oval(nextX + windowMidpoint[0] - 5, nextY + windowMidpoint[1] - 5, nextX + windowMidpoint[0] + 5, nextY + windowMidpoint[1] + 5, fill='red')
         ret[i][0] = nextX + windowMidpoint[0]
         ret[i][1] = nextY + windowMidpoint[1]
@@ -82,6 +83,7 @@ win = GraphWin('attractor', windowDimensions[1], windowDimensions[0])
 win.setBackground("black")
 #C.pack()
 
+gameBoard = [[0 for i in range(windowDimensions[0])] for j in range(windowDimensions[1])]
 anchors = generateAnchorPts(anchorCount)
 
 pt = windowMidpoint[0], windowMidpoint[1] #initialize point to wherever, really doesnt matter
@@ -89,11 +91,26 @@ i = 0
 while i < shots:
     lastPt = pt
     pt = getNextPt(lastPt, anchors)
-
+    x = int(pt[0])
+    y = int(pt[1])
     #C.create_oval(pt[0], pt[1], pt[0]+2, pt[1]+2, fill='white')
+    win.plotPixel(x, y, "white")
+    gameBoard[x][y] = 1
     #C.update()
     i += 1
-
+change = True
+iterator = 0
+#while change:
+while iterator < 10:
+    gameBoard, change = updateBoard(gameBoard)
+    #print(change)
+    iterator += 1
+    for i in range(windowDimensions[0]):
+        for j in range(windowDimensions[1]):
+            if (gameBoard[i][j] == 1):
+                win.plotPixel(i, j, "white")
+            else:
+                win.plotPixel(i, j, "black")
 #top.mainloop()
 win.getMouse()
 win.close()
